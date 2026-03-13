@@ -1,25 +1,25 @@
-import React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import { WebView } from "react-native-webview";
 
 export default function ControllerRC() {
   const navigation = useNavigation();
+  const [timestamp, setTimestamp] = useState(Date.now());
+
+  // On rafraîchit l'image toutes les 200 ms
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimestamp(Date.now());
+    }, 200); // 200 ms = 5 fps, tu peux ajuster
+    return () => clearInterval(interval);
+  }, []);
+
+  const videoUrl = `http://172.16.206.24:5000/video?ts=${timestamp}`;
 
   return (
     <SafeAreaView style={styles.container}>
-      
       <Text style={styles.title}>Controller RC</Text>
-
-      <View style={styles.cameraContainer}>
-        <WebView
-          source={{ uri: "http://172.16.206.24:5000" }}
-          style={styles.camera}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-        />
-      </View>
 
       <Pressable
         style={styles.button}
@@ -28,6 +28,13 @@ export default function ControllerRC() {
         <Text style={styles.buttonText}>Exit</Text>
       </Pressable>
 
+      <View style={styles.cameraContainer}>
+        <Image
+          source={{ uri: videoUrl }}
+          style={styles.camera}
+          resizeMode="cover"
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -35,16 +42,16 @@ export default function ControllerRC() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#111",
     alignItems: "center",
+    backgroundColor: "#111",
   },
 
   title: {
     fontSize: 24,
-    color: "white",
     marginTop: 20,
     marginBottom: 20,
     fontWeight: "bold",
+    color: "white",
   },
 
   cameraContainer: {
@@ -53,10 +60,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: "hidden",
     backgroundColor: "black",
+    borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   camera: {
-    flex: 1,
+    width: 320,
+    height: 240,
+    resizeMode: "contain",
   },
 
   button: {

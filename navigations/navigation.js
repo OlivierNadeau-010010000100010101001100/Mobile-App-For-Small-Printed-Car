@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import Main from "../screens/Main";
 import ControllerRC from "../screens/ControllerRC";
+import ControllerButtons from "../screens/ControllerText";
 
 const Navigation = createNativeStackNavigator();
 
@@ -16,7 +17,7 @@ export default function NavigationMain() {
         }}
       >
         <Navigation.Screen name="Main" component={Main} />
-        <Navigation.Screen name="ControllerRC" component={ControllerRC} />
+        <Navigation.Screen name="ControllerRC" component={ControllerButtons} />
       </Navigation.Navigator>
     </NavigationContainer>
   );
