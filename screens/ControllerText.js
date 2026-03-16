@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, SafeAreaView, Pressable } from "react-native";
+import useRcStore from "../store/useRcStore";
 
 export default function ControllerRoundButtonsSides() {
+  const { send, connected } = useRcStore();
+
   const [activeDirections, setActiveDirections] = useState({
     Avancer: false,
     Reculer: false,
@@ -9,30 +12,32 @@ export default function ControllerRoundButtonsSides() {
     Droite: false,
   });
 
+  // Maps French button names to MQTT command strings
+  const COMMAND_MAP = {
+    Avancer: { press: "forward",  release: "forwardStop"  },
+    Reculer: { press: "backward", release: "backwardStop" },
+    Gauche:  { press: "left",     release: "leftStop"     },
+    Droite:  { press: "right",    release: "rightStop"    },
+  };
+
   const handleTouchStart = (dir) => {
     setActiveDirections((prev) => {
-      // Commence par copier l'état actuel
       const newState = { ...prev };
-
-      // Si on active Avancer ou Reculer, désactive l'opposé
       if (dir === "Avancer") newState.Reculer = false;
       if (dir === "Reculer") newState.Avancer = false;
-
-      // Si on active Gauche ou Droite, désactive l'opposé
-      if (dir === "Gauche") newState.Droite = false;
-      if (dir === "Droite") newState.Gauche = false;
-
-      // Active le bouton appuyé
+      if (dir === "Gauche")  newState.Droite  = false;
+      if (dir === "Droite")  newState.Gauche  = false;
       newState[dir] = true;
-
       return newState;
     });
-    console.log("Début :", dir);
+
+    if (connected) send(COMMAND_MAP[dir].press);
   };
 
   const handleTouchEnd = (dir) => {
     setActiveDirections((prev) => ({ ...prev, [dir]: false }));
-    console.log("Fin :", dir);
+
+    if (connected) send(COMMAND_MAP[dir].release);
   };
 
   const BUTTON_SIZE = 80;
@@ -42,7 +47,8 @@ export default function ControllerRoundButtonsSides() {
       style={[
         styles.roundButton,
         { width: BUTTON_SIZE, height: BUTTON_SIZE },
-        activeDirections[dir] && { backgroundColor: "#ff7777" }, // visuel actif
+        activeDirections[dir] && { backgroundColor: "#ff7777" },
+        !connected && styles.disabledButton,
       ]}
       onTouchStart={() => handleTouchStart(dir)}
       onTouchEnd={() => handleTouchEnd(dir)}
@@ -55,6 +61,12 @@ export default function ControllerRoundButtonsSides() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Contrôle Car</Text>
+
+      {/* Connection status indicator */}
+      <View style={styles.statusRow}>
+        <View style={[styles.statusDot, connected ? styles.dotConnected : styles.dotDisconnected]} />
+        <Text style={styles.statusText}>{connected ? "Connecté" : "Déconnecté"}</Text>
+      </View>
 
       {/* Avancer / Reculer à gauche */}
       <View style={[styles.sideButtonsVertical, { height: BUTTON_SIZE * 2 + 20, left: 20 }]}>
@@ -78,29 +90,47 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
   },
-
   title: {
     fontSize: 28,
     fontWeight: "bold",
     color: "white",
     textAlign: "center",
-    marginBottom: 40,
+    marginBottom: 10,
   },
-
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 30,
+    gap: 8,
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  dotConnected: {
+    backgroundColor: "#44ff88",
+  },
+  dotDisconnected: {
+    backgroundColor: "#ff4444",
+  },
+  statusText: {
+    color: "#aaa",
+    fontSize: 14,
+  },
   sideButtonsVertical: {
     position: "absolute",
     bottom: 80,
     justifyContent: "space-between",
     flexDirection: "column",
   },
-
   sideButtonsHorizontal: {
     position: "absolute",
     bottom: 20,
     justifyContent: "space-between",
     flexDirection: "row",
   },
-
   roundButton: {
     borderRadius: 40,
     backgroundColor: "#ff4444",
@@ -113,13 +143,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 4,
   },
-
+  disabledButton: {
+    backgroundColor: "#444",
+    opacity: 0.5,
+  },
   triangle: {
     width: 0,
     height: 0,
     borderStyle: "solid",
   },
-
   upTriangle: {
     borderLeftWidth: 18,
     borderRightWidth: 18,
@@ -128,7 +160,6 @@ const styles = StyleSheet.create({
     borderRightColor: "transparent",
     borderBottomColor: "white",
   },
-
   downTriangle: {
     borderLeftWidth: 18,
     borderRightWidth: 18,
@@ -137,7 +168,6 @@ const styles = StyleSheet.create({
     borderRightColor: "transparent",
     borderTopColor: "white",
   },
-
   leftTriangle: {
     borderTopWidth: 18,
     borderBottomWidth: 18,
@@ -146,7 +176,6 @@ const styles = StyleSheet.create({
     borderBottomColor: "transparent",
     borderRightColor: "white",
   },
-
   rightTriangle: {
     borderTopWidth: 18,
     borderBottomWidth: 18,

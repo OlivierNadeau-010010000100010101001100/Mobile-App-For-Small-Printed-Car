@@ -7,19 +7,17 @@ const TOPIC      = 'rc/control';
 
 export default function useMqtt() {
   const clientRef = useRef(null);
-  const { setConnected } = useRcStore();
+  const { setConnected, setSend } = useRcStore();
 
   useEffect(() => {
     const client = mqtt.connect(BROKER_URL);
     clientRef.current = client;
+
     client.on('connect', () => setConnected(true));
     client.on('close',   () => setConnected(false));
+
+    setSend((cmd) => client.publish(TOPIC, cmd));
+
     return () => client.end();
   }, []);
-
-  const send = (dir) => {
-    clientRef.current?.publish(TOPIC, dir);
-  };
-
-  return { send };
 }
