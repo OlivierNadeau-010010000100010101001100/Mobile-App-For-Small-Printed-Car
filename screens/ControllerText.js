@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, SafeAreaView, Pressable } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, SafeAreaView, Pressable, Image } from "react-native";
 import useRcStore from "../store/useRcStore";
 
 export default function ControllerRoundButtonsSides() {
   const { send, connected } = useRcStore();
+  const [timestamp, setTimestamp] = useState(Date.now());
 
   const [activeDirections, setActiveDirections] = useState({
     Avancer: false,
@@ -12,7 +13,11 @@ export default function ControllerRoundButtonsSides() {
     Droite: false,
   });
 
-  // Maps French button names to MQTT command strings
+  useEffect(() => {
+    const interval = setInterval(() => setTimestamp(Date.now()), 100);
+    return () => clearInterval(interval);
+  }, []);
+
   const COMMAND_MAP = {
     Avancer: { press: "forward",  release: "forwardStop"  },
     Reculer: { press: "backward", release: "backwardStop" },
@@ -30,13 +35,11 @@ export default function ControllerRoundButtonsSides() {
       newState[dir] = true;
       return newState;
     });
-
     if (connected) send(COMMAND_MAP[dir].press);
   };
 
   const handleTouchEnd = (dir) => {
     setActiveDirections((prev) => ({ ...prev, [dir]: false }));
-
     if (connected) send(COMMAND_MAP[dir].release);
   };
 
@@ -62,22 +65,34 @@ export default function ControllerRoundButtonsSides() {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Contrôle Car</Text>
 
-      {/* Connection status indicator */}
       <View style={styles.statusRow}>
         <View style={[styles.statusDot, connected ? styles.dotConnected : styles.dotDisconnected]} />
         <Text style={styles.statusText}>{connected ? "Connecté" : "Déconnecté"}</Text>
       </View>
 
-      {/* Avancer / Reculer à gauche */}
-      <View style={[styles.sideButtonsVertical, { height: BUTTON_SIZE * 2 + 20, left: 20 }]}>
-        {renderButton("Avancer", styles.upTriangle)}
-        {renderButton("Reculer", styles.downTriangle)}
-      </View>
+      <View style={styles.controlRow}>
 
-      {/* Gauche / Droite à droite */}
-      <View style={[styles.sideButtonsHorizontal, { width: BUTTON_SIZE * 2 + 20, right: 20 }]}>
-        {renderButton("Gauche", styles.leftTriangle)}
-        {renderButton("Droite", styles.rightTriangle)}
+        {/* Avancer / Reculer */}
+        <View style={styles.sideButtonsVertical}>
+          {renderButton("Avancer", styles.upTriangle)}
+          {renderButton("Reculer", styles.downTriangle)}
+        </View>
+
+        {/* Camera feed */}
+        <View style={styles.cameraContainer}>
+          <Image
+            source={{ uri: `http://172.16.206.24:5000/snapshot?ts=${timestamp}` }}
+            style={styles.camera}
+            resizeMode="cover"
+          />
+        </View>
+
+        {/* Gauche / Droite */}
+        <View style={styles.sideButtonsHorizontal}>
+          {renderButton("Gauche", styles.leftTriangle)}
+          {renderButton("Droite", styles.rightTriangle)}
+        </View>
+
       </View>
     </SafeAreaView>
   );
@@ -87,6 +102,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#111",
+    alignItems: "center",
     justifyContent: "center",
     padding: 20,
   },
@@ -101,7 +117,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 30,
+    marginBottom: 20,
     gap: 8,
   },
   statusDot: {
@@ -119,17 +135,35 @@ const styles = StyleSheet.create({
     color: "#aaa",
     fontSize: 14,
   },
+  controlRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
   sideButtonsVertical: {
-    position: "absolute",
-    bottom: 80,
-    justifyContent: "space-between",
     flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
   },
   sideButtonsHorizontal: {
-    position: "absolute",
-    bottom: 20,
-    justifyContent: "space-between",
     flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cameraContainer: {
+    width: 160,
+    height: 120,
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "#000",
+    borderWidth: 2,
+    borderColor: "#333",
+  },
+  camera: {
+    width: "100%",
+    height: "100%",
   },
   roundButton: {
     borderRadius: 40,
