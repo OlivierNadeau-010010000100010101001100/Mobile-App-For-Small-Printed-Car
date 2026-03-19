@@ -31,8 +31,8 @@ export const ApiProvider = ({ children }) => {
     const users = await request("users");
     const found = users.find(
       (u) =>
-        u.username.toLowerCase() === username.toLowerCase() &&
-        u.password.toLowerCase() === password.toLowerCase()
+        u.username.toLowerCase() === username.toLowerCase() && //sécurité maximale!
+        u.password === password
     );
 
     if (found) {
