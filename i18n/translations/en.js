@@ -4,8 +4,18 @@ export default {
     hello: "Hello",
     loggedIn: "Logged in as",
     notLoggedIn: "User not logged in",
-    goToController: "Go to ControllerRC"
+    goToController: "Go to ControllerRC",
+    noSchedules: "No Schedule",
+    beerSchedules: "Beers Schedule",
   },
-  settings: { title: "Settings", language: "Language", darkmode:"Color Theme", dark:"Dark", light:"Light" },
-  about: { title: "About" },
+  settings: {
+    title: "Settings",
+    language: "Language",
+    darkmode: "Color Theme",
+    dark: "Dark",
+    light: "Light",
+  },
+  about: {
+    title: "About",
+  },
 };

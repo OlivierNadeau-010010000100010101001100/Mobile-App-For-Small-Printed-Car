@@ -7,7 +7,7 @@ export const ApiProvider = ({ children }) => {
   const apiUrl = "http://172.16.84.112/server_car.php";
 
   const [user, setUser] = useState(null);
-  const [isConnected, setIsConnected] = useState(false); // ✅ déclarer setIsConnected
+  const [isConnected, setIsConnected] = useState(false);
 
   // au démarrage, récupérer l'utilisateur si isConnected=true
   useEffect(() => {
@@ -26,42 +26,9 @@ export const ApiProvider = ({ children }) => {
     loadUser();
   }, []);
 
-  // login avec option “stayConnected”
-  const login = async (username, password, stayConnected = false) => {
-    const users = await request("users");
-    const found = users.find(
-      (u) =>
-        u.username.toLowerCase() === username.toLowerCase() && //sécurité maximale!
-        u.password === password
-    );
-
-    if (found) {
-      setUser(found);
-      setIsConnected(stayConnected);
-
-      if (stayConnected) {
-        await AsyncStorage.setItem("user", JSON.stringify(found));
-        await AsyncStorage.setItem("isConnected", "true");
-      } else {
-        // supprimer tout ancien stockage si pas stayConnected
-        await AsyncStorage.removeItem("user");
-        await AsyncStorage.removeItem("isConnected");
-      }
-
-      return true;
-    }
-
-    return false;
-  };
-
-  const logout = async () => {
-    setUser(null);
-    setIsConnected(false);
-    await AsyncStorage.removeItem("user");
-    await AsyncStorage.removeItem("isConnected");
-  };
-
-  // fonction générique pour requêtes API
+  // =========================
+  // REQUEST UTILE
+  // =========================
   const request = async (route, method = "GET", body = null) => {
     try {
       const url = `${apiUrl}?route=${route}`;
@@ -75,8 +42,84 @@ export const ApiProvider = ({ children }) => {
     }
   };
 
+  // =========================
+  // LOGIN / LOGOUT
+  // =========================
+  const login = async (username, password, stayConnected = false) => {
+    const users = await request("users");
+    const found = users.find(
+      (u) =>
+        u.username.toLowerCase() === username.toLowerCase() &&
+        u.password === password
+    );
+
+    if (found) {
+      setUser(found);
+      setIsConnected(stayConnected);
+
+      if (stayConnected) {
+        await AsyncStorage.setItem("user", JSON.stringify(found));
+        await AsyncStorage.setItem("isConnected", "true");
+        await AsyncStorage.setItem("userId", found.user_id.toString());
+      } else {
+        await AsyncStorage.removeItem("user");
+        await AsyncStorage.removeItem("isConnected");
+        await AsyncStorage.removeItem("userId");
+      }
+
+      return true;
+    }
+
+    return false;
+  };
+
+  const logout = async () => {
+    setUser(null);
+    setIsConnected(false);
+    await AsyncStorage.removeItem("user");
+    await AsyncStorage.removeItem("isConnected");
+    await AsyncStorage.removeItem("userId");
+  };
+
+  // =========================
+  // USERS
+  // =========================
+  const create_user = async (username, password) => {
+    const body = { username, password };
+    return await request("users", "POST", body);
+  };
+
+  // =========================
+  // BEER SCHEDULES
+  // =========================
+  const get_beer_schedule = async (userId) => {
+    return await request(`users/${userId}/schedules`);
+  };
+
+  const create_beer_schedule = async (userId, time_departure, distance_to_dropzone) => {
+    const body = { time_departure, distance_to_dropzone };
+    return await request(`users/${userId}/schedules`, "POST", body);
+  };
+
+  const delete_beer_schedule = async (userId, scheduleId) => {
+    return await request(`users/${userId}/schedules/${scheduleId}`, "DELETE");
+  };
+
   return (
-    <ApiContext.Provider value={{ apiUrl, request, user, isConnected, login, logout }}>
+    <ApiContext.Provider
+      value={{
+        apiUrl,
+        request,
+        user,
+        isConnected,
+        login,
+        logout,
+        create_user,
+        get_beer_schedule,
+        create_beer_schedule,
+        delete_beer_schedule,
+      }}
+    >
       {children}
     </ApiContext.Provider>
   );
