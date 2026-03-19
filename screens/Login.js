@@ -31,7 +31,7 @@ export default function Login() {
     try {
       const success = await login(username, password, stayConnected);
       if (success) {
-        Alert.alert("Succès", "Connexion réussie");
+        // Alert.alert("Succès", "Connexion réussie");
         navigation.replace("Tabs");
       } else {
         Alert.alert("Erreur", "Identifiants invalides");

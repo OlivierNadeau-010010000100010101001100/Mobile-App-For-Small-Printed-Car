@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import mqtt from 'mqtt';
-import useRcStore from '../store/useRcStore';
+import useRcStore from '../stores/useRcStore';
 
 const BROKER_URL = 'ws://172.16.206.22:9001';
 const TOPIC      = 'rc/control';

@@ -1,4 +1,4 @@
-import { Text, View, Pressable, StyleSheet, Alert } from "react-native";
+import { Text, View, Pressable, StyleSheet, Alert, Switch } from "react-native";
 import { useAppStore } from "../stores/useAppStore";
 import { useTranslation } from "../i18n";
 import { useApi } from "../providers/ProviderUrl";
@@ -28,11 +28,7 @@ export const Settings = () => {
       <Text style={styles.title}>{t("settings.title")}</Text>
 
       {/* User info */}
-      {user && (
-        <Text style={styles.userInfo}>
-          Connecté : {user.username}
-        </Text>
-      )}
+      {user && <Text style={styles.userInfo}>Connecté : {user.username}</Text>}
 
       {/* Language toggle */}
       <Text style={styles.label}>{t("settings.language")}</Text>
@@ -42,8 +38,19 @@ export const Settings = () => {
         </Text>
       </Pressable>
 
+      {/* Language toggle */}
+      <Text style={styles.label}>{t("settings.darkmode")}</Text>
+      <View style={{ flexDirection: "row" }}>
+        <Text>{t("settings.dark")}</Text>
+        <Switch></Switch>
+        <Text>{t("settings.light")}</Text>
+      </View>
+
       {/* Logout */}
-      <Pressable style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
+      <Pressable
+        style={[styles.button, styles.logoutButton]}
+        onPress={handleLogout}
+      >
         <Text style={styles.buttonText}>
           {language === "fr" ? "Se déconnecter" : "Logout"}
         </Text>
