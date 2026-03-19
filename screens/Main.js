@@ -1,45 +1,32 @@
-import { View, Text, Pressable, StyleSheet, Alert } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useApi } from "../providers/ProviderUrl";
+import { useAppStore } from "../stores/useAppStore";
+import { useTranslation } from "../i18n";
 
 export default function Main() {
   const navigation = useNavigation();
-  const { user, logout } = useApi(); // récupérer user et logout
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      Alert.alert("Déconnexion", "Vous êtes déconnecté(e)");
-      navigation.replace("Login");
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Erreur", "Impossible de se déconnecter");
-    }
-  };
+  const { user } = useApi();
+  const language = useAppStore((s) => s.language);
+  const { t } = useTranslation(language);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Main Screen</Text>
+      <Text style={styles.title}>{t("home.title")}</Text>
 
-      {/* Afficher le username */}
       {user ? (
-        <Text style={styles.username}>Connecté en tant que : {user.username}</Text>
+        <Text style={styles.username}>
+          {t("home.loggedIn")} : {user.username}
+        </Text>
       ) : (
-        <Text style={styles.username}>Utilisateur non connecté</Text>
+        <Text style={styles.username}>{t("home.notLoggedIn")}</Text>
       )}
 
       <Pressable
         style={styles.button}
         onPress={() => navigation.navigate("ControllerRC")}
       >
-        <Text style={styles.buttonText}>Aller vers ControllerRC</Text>
-      </Pressable>
-
-      <Pressable
-        style={[styles.button, { backgroundColor: "red", marginTop: 20 }]}
-        onPress={handleLogout}
-      >
-        <Text style={styles.buttonText}>Se Déconnecter</Text>
+        <Text style={styles.buttonText}>{t("home.goToController")}</Text>
       </Pressable>
     </View>
   );

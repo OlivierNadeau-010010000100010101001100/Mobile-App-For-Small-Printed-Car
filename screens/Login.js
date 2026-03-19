@@ -19,7 +19,7 @@ export default function Login() {
   const [stayConnected, setStayConnected] = useState(false);
 
   useEffect(() => {
-    if (user) navigation.replace("Main");
+    if (user) navigation.replace("Tabs")
   }, [user]);
 
   const ConnectionController = async () => {
@@ -32,7 +32,7 @@ export default function Login() {
       const success = await login(username, password, stayConnected);
       if (success) {
         Alert.alert("Succès", "Connexion réussie");
-        navigation.replace("Main");
+        navigation.replace("Tabs");
       } else {
         Alert.alert("Erreur", "Identifiants invalides");
       }

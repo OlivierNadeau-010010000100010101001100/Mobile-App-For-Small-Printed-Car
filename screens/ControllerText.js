@@ -65,7 +65,7 @@ export default function ControllerRoundButtonsSides() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Pressable style={styles.mainButton} onPress={() => navigation.navigate("Main")}>
+      <Pressable style={styles.mainButton} onPress={() => navigation.goBack()}>
           <Text style={styles.mainButtonText}>Retour au Main</Text>
         </Pressable>
 
