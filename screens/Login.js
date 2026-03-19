@@ -1,33 +1,38 @@
-import { View, Text, Pressable, StyleSheet, TextInput, Alert } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  Alert,
+  Switch,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useApi } from "../providers/ProviderUrl";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Login() {
   const navigation = useNavigation();
-  const { request } = useApi(); // ✅
-
+  const { login, user } = useApi();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [stayConnected, setStayConnected] = useState(false);
+
+  useEffect(() => {
+    if (user) navigation.replace("Main");
+  }, [user]);
 
   const ConnectionController = async () => {
+    if (!username || !password) {
+      Alert.alert("Erreur", "Veuillez entrer votre username et password");
+      return;
+    }
+
     try {
-      // 🔥 récupérer tous les users
-      const users = await request("users");
-
-      // 🔎 vérifier login en minuscules
-      const user = users.find(
-        (u) =>
-          u.username.toLowerCase() === username.toLowerCase() &&
-          u.password.toLowerCase() === password.toLowerCase()
-      );
-
-      if (user) {
-        console.log("Connecté :", user);
+      const success = await login(username, password, stayConnected);
+      if (success) {
         Alert.alert("Succès", "Connexion réussie");
-
-        // navigation vers l'écran Main
-        navigation.navigate("Main");
+        navigation.replace("Main");
       } else {
         Alert.alert("Erreur", "Identifiants invalides");
       }
@@ -41,24 +46,28 @@ export default function Login() {
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
 
-      {/* Username */}
       <TextInput
         style={styles.input}
         placeholder="Username"
         value={username}
-        onChangeText={(text) => setUsername(text.toLowerCase())} // forcer minuscule
+        onChangeText={(text) => setUsername(text.toLowerCase())}
         autoCapitalize="none"
       />
 
-      {/* Password */}
       <TextInput
         style={styles.input}
         placeholder="Password"
         secureTextEntry
         value={password}
-        onChangeText={(text) => setPassword(text.toLowerCase())} // forcer minuscule
+        onChangeText={(text) => setPassword(text.toLowerCase())}
         autoCapitalize="none"
       />
+
+      {/* Switch pour rester connecté */}
+      <View style={styles.stayConnectedRow}>
+        <Switch value={stayConnected} onValueChange={setStayConnected} />
+        <Text style={styles.stayConnectedText}>Rester connecté</Text>
+      </View>
 
       <Pressable style={styles.button} onPress={ConnectionController}>
         <Text style={styles.buttonText}>Se Connecter</Text>
@@ -73,11 +82,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
+    backgroundColor: "#fff",
   },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-  },
+  title: { fontSize: 24, marginBottom: 20 },
   input: {
     width: "100%",
     borderWidth: 1,
@@ -86,6 +93,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
   },
+  stayConnectedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  stayConnectedText: { marginLeft: 8, fontSize: 16 },
   button: {
     backgroundColor: "blue",
     padding: 12,
@@ -93,8 +106,5 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-  },
+  buttonText: { color: "#fff", fontSize: 16 },
 });
