@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, SafeAreaView, Pressable, Image } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import useRcStore from "../store/useRcStore";
 
 export default function ControllerRoundButtonsSides() {
+  const navigation = useNavigation();
   const { send, connected } = useRcStore();
   const [timestamp, setTimestamp] = useState(Date.now());
 
@@ -63,6 +65,10 @@ export default function ControllerRoundButtonsSides() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Pressable style={styles.mainButton} onPress={() => navigation.navigate("Main")}>
+          <Text style={styles.mainButtonText}>Retour au Main</Text>
+        </Pressable>
+
       <Text style={styles.title}>Contrôle Car</Text>
 
       <View style={styles.statusRow}>
@@ -217,5 +223,18 @@ const styles = StyleSheet.create({
     borderTopColor: "transparent",
     borderBottomColor: "transparent",
     borderLeftColor: "white",
+  },
+  mainButton: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    backgroundColor: "#444",
+    padding: 10,
+    borderRadius: 10,
+    zIndex: 10,
+  },
+  mainButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
