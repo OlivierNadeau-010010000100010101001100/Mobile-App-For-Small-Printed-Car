@@ -7,6 +7,13 @@ export default {
     goToController: "Aller au ControllerRC",
     noSchedules: "Aucun planning",
     beerSchedules: "Planning des bières",
+    confirmDelete: "Confirmer la suppression",
+    confirmDeleteText: "Voulez-vous vraiment supprimer ce planning ?",
+    cancel: "Annuler",
+    delete: "Supprimer",
+    editSchedule: "Modifier le planning",
+    timeDeparture: "Heure de départ",
+    distance: "Distance",
   },
   settings: {
     title: "Paramètres",
