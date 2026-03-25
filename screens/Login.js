@@ -13,78 +13,163 @@ import { useState, useEffect } from "react";
 
 export default function Login() {
   const navigation = useNavigation();
-  const { login, user } = useApi();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const { login, create_user, user } = useApi();
+
+  // LOGIN
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
   const [stayConnected, setStayConnected] = useState(false);
 
+  // REGISTER
+  const [registerUsername, setRegisterUsername] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+
   useEffect(() => {
-    if (user) navigation.replace("Tabs")
+    if (user) navigation.replace("Tabs");
   }, [user]);
 
-  const ConnectionController = async () => {
-    if (!username || !password) {
-      Alert.alert("Erreur", "Veuillez entrer votre username et password");
+  // =========================
+  // LOGIN
+  // =========================
+  const handleLogin = async () => {
+    if (!loginUsername || !loginPassword) {
+      Alert.alert("Erreur", "Remplis tous les champs (login)");
       return;
     }
 
     try {
-      const success = await login(username, password, stayConnected);
+      const success = await login(
+        loginUsername,
+        loginPassword,
+        stayConnected
+      );
+
       if (success) {
-        // Alert.alert("Succès", "Connexion réussie");
         navigation.replace("Tabs");
       } else {
         Alert.alert("Erreur", "Identifiants invalides");
       }
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Erreur", "Problème serveur");
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Erreur serveur");
     }
   };
 
+  // =========================
+  // REGISTER
+  // =========================
+  const handleRegister = async () => {
+    if (!registerUsername || !registerPassword) {
+      Alert.alert("Erreur", "Remplis tous les champs (register)");
+      return;
+    }
+
+    try {
+      await create_user(registerUsername, registerPassword);
+
+      Alert.alert("Succès", "Compte créé !");
+
+      setRegisterUsername("");
+      setRegisterPassword("");
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Erreur création compte");
+    }
+  };
+
+  // =========================
+  // UI
+  // =========================
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      {/* LOGIN (gauche) */}
+      <View style={styles.column}>
+        <Text style={styles.title}>Login</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={(text) => setUsername(text.toLowerCase())}
-        autoCapitalize="none"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={loginUsername}
+          onChangeText={(t) => setLoginUsername(t.toLowerCase())}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={(text) => setPassword(text.toLowerCase())}
-        autoCapitalize="none"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          value={loginPassword}
+          onChangeText={(t) => setLoginPassword(t.toLowerCase())}
+        />
 
-      {/* Switch pour rester connecté */}
-      <View style={styles.stayConnectedRow}>
-        <Switch value={stayConnected} onValueChange={setStayConnected} />
-        <Text style={styles.stayConnectedText}>Rester connecté</Text>
+        <View style={styles.switchRow}>
+          <Switch value={stayConnected} onValueChange={setStayConnected} />
+          <Text style={styles.switchText}>Stay connected</Text>
+        </View>
+
+        <Pressable style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Login</Text>
+        </Pressable>
       </View>
 
-      <Pressable style={styles.button} onPress={ConnectionController}>
-        <Text style={styles.buttonText}>Se Connecter</Text>
-      </Pressable>
+      {/* BARRE CENTRALE */}
+      <View style={styles.divider} />
+
+      {/* REGISTER (droite) */}
+      <View style={styles.column}>
+        <Text style={styles.title}>Register</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={registerUsername}
+          onChangeText={(t) => setRegisterUsername(t.toLowerCase())}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          value={registerPassword}
+          onChangeText={(t) => setRegisterPassword(t.toLowerCase())}
+        />
+
+        <Pressable style={styles.button} onPress={handleRegister}>
+          <Text style={styles.buttonText}>Register</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
 
+// =========================
+// STYLES
+// =========================
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
+    flexDirection: "row", // ✅ SPLIT HORIZONTAL
     backgroundColor: "#fff",
   },
-  title: { fontSize: 24, marginBottom: 20 },
+
+  column: {
+    flex: 1, // ✅ 50%
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 50,
+  },
+
+  divider: {
+    width: 1,
+    backgroundColor: "#ccc",
+    marginVertical: 40,
+  },
+
+  title: {
+    fontSize: 22,
+    marginBottom: 20,
+    fontWeight: "bold",
+  },
+
   input: {
     width: "100%",
     borderWidth: 1,
@@ -93,18 +178,28 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
   },
-  stayConnectedRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  stayConnectedText: { marginLeft: 8, fontSize: 16 },
+
   button: {
     backgroundColor: "blue",
     padding: 12,
     borderRadius: 15,
     width: "100%",
     alignItems: "center",
+    marginTop: 10,
   },
-  buttonText: { color: "#fff", fontSize: 16 },
+
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+
+  switchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+
+  switchText: {
+    marginLeft: 8,
+  },
 });
