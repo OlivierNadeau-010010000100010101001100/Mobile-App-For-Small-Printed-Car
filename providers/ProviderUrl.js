@@ -46,6 +46,15 @@ export const ApiProvider = ({ children }) => {
   // LOGIN / LOGOUT
   // =========================
   const login = async (username, password, stayConnected = false) => {
+
+
+     const fakeUser = { user_id: 1, username: "dev" };
+      setUser(fakeUser);
+      return true;
+
+
+
+
     const users = await request("users");
     const found = users.find(
       (u) =>

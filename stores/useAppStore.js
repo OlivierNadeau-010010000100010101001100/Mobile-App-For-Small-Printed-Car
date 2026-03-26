@@ -7,6 +7,8 @@ export const useAppStore = create(
     (set) => ({
       language: null,
       setLanguage: (language) => set({ language }),
+      darkMode: false,
+      setDarkMode: (darkMode) => set({ darkMode }),
     }),
     {
       name: "app-store",
