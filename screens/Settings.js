@@ -1,4 +1,4 @@
-import { Text, View, Pressable, StyleSheet, Alert, Switch } from "react-native";
+import { Text, View, Pressable, StyleSheet, Alert, Switch, ScrollView } from "react-native";
 import { useAppStore } from "../stores/useAppStore";
 import { useTranslation } from "../i18n";
 import { useApi } from "../providers/ProviderUrl";
@@ -25,7 +25,7 @@ export const Settings = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background, padding:50 }]}>
       <Text style={[styles.title, { color: theme.text }]}>{t("settings.title")}</Text>
 
       {user && (
@@ -51,7 +51,7 @@ export const Settings = () => {
       <Pressable style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
         <Text style={styles.buttonText}>{t("settings.logout")}</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 };
 
