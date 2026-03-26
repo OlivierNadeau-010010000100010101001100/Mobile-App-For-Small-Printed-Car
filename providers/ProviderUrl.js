@@ -32,7 +32,10 @@ export const ApiProvider = ({ children }) => {
   const request = async (route, method = "GET", body = null) => {
     try {
       const url = `${apiUrl}?route=${route}`;
-      const options = { method, headers: { "Content-Type": "application/json" } };
+      const options = {
+        method,
+        headers: { "Content-Type": "application/json" },
+      };
       if (body) options.body = JSON.stringify(body);
       const response = await fetch(url, options);
       return await response.json();
@@ -46,20 +49,11 @@ export const ApiProvider = ({ children }) => {
   // LOGIN / LOGOUT
   // =========================
   const login = async (username, password, stayConnected = false) => {
-
-
-     const fakeUser = { user_id: 1, username: "dev" };
-      setUser(fakeUser);
-      return true;
-
-
-
-
     const users = await request("users");
     const found = users.find(
       (u) =>
         u.username.toLowerCase() === username.toLowerCase() &&
-        u.password === password
+        u.password === password,
     );
 
     if (found) {
@@ -105,7 +99,11 @@ export const ApiProvider = ({ children }) => {
     return await request(`users/${userId}/schedules`);
   };
 
-  const create_beer_schedule = async (userId, time_departure, distance_to_dropzone) => {
+  const create_beer_schedule = async (
+    userId,
+    time_departure,
+    distance_to_dropzone,
+  ) => {
     const body = { time_departure, distance_to_dropzone };
     return await request(`users/${userId}/schedules`, "POST", body);
   };
